@@ -1,0 +1,8 @@
+api:
+  origin: "*"
+
+#ffmpeg: TODO(mjforan) tune video parameters
+
+streams:
+  picam_h264: ffmpeg:udp://127.0.0.1:8099
+  #easy_cap:   ffmpeg:device?video=/dev/video0&video_size=720x480#video=h264

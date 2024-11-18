@@ -12,6 +12,7 @@ ARG ROS_DISTRO=jazzy
 # Downgrade libssl slightly to fix dependency issue
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
+     apt update && \
      apt install -y vcstool python3-rosdep2 python3-vcstools colcon cmake && \
      apt install -y --allow-downgrades libssl3=3.0.14-1~deb12u2
 WORKDIR /ros2_ws

@@ -8,6 +8,5 @@ ffmpeg:
   myraw: "-ss 00:00:20"
 
 streams:
-  #picam_h264: exec:rpicam-vid --mode 1536:864 --width 1536 --height 864 --framerate 120.13 --timeout 0 --nopreview --codec h264 --libav-format h264 --inline -o -
-  picam_h264: ffmpeg:udp://127.0.0.1:8099
+  picam_h264: exec:/stream.sh
   #easy_cap:   ffmpeg:device?video=/dev/video0&video_size=720x480#video=h264

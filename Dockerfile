@@ -13,7 +13,7 @@ ARG ROS_DISTRO=jazzy
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
      apt update && \
-     apt install -y vcstool python3-rosdep2 python3-vcstools colcon cmake && \
+     apt install -y vcstool python3-rosdep2 python3-vcstools colcon build-essential && \
      apt install -y --allow-downgrades libssl3=3.0.14-1~deb12u2
 WORKDIR /ros2_ws
 # It would be nice to ADD these repos so Docker caches them
@@ -55,3 +55,10 @@ RUN . /ros2_ws/install/setup.sh && meson compile -C build && meson install -C bu
 RUN ldconfig
 
 # TODO statically compile https://github.com/ros2/ament_cmake_ros/blob/3f421a0bafa8de0caae1ae2baefc5b982bf4f81a/ament_cmake_ros/cmake/build_shared_libs.cmake#L15-L20 and only copy binaries to output image
+
+ADD --chmod=755 https://github.com/AlexxIT/go2rtc/releases/latest/download/go2rtc_linux_arm64 /usr/local/bin/go2rtc
+RUN mkfifo /video_pipe
+RUN apt install -y socat
+
+COPY ./stream.sh /stream.sh
+COPY ./detect.sh /detect.sh

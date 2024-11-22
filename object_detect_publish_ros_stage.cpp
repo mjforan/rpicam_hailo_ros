@@ -65,8 +65,10 @@ bool ObjectDetectPublishRosStage::Process(CompletedRequestPtr &completed_request
 	{
 		auto det_msg = vision_msgs::msg::Detection2D();
 		auto result_msg = vision_msgs::msg::ObjectHypothesisWithPose();
-		det_msg.bbox.center.position.x = detection.box.x;
-		det_msg.bbox.center.position.y = detection.box.y;
+		det_msg.header.stamp = det_arr_msg.header.stamp;
+		det_msg.header.frame_id = det_arr_msg.header.frame_id;
+		det_msg.bbox.center.position.x = detection.box.x + detection.box.width/2;
+		det_msg.bbox.center.position.y = detection.box.y + detection.box.height/2;
 		det_msg.bbox.size_x            = detection.box.width;
 		det_msg.bbox.size_y            = detection.box.height;
 		result_msg.hypothesis.class_id = detection.name;

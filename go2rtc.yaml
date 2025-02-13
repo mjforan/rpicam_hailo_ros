@@ -3,4 +3,4 @@ api:
 
 streams:
   #easy_cap:   ffmpeg:device?video=/dev/video0&video_size=720x480#video=h264
-  loopback: ffmpeg:device?video=/dev/video50&input_format=h264&video_size=1536x864
+  picam_h264: ffmpeg:device?video=/dev/video50&input_format=h264&video_size=1536x864

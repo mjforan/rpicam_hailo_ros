@@ -1,12 +1,6 @@
 api:
   origin: "*"
 
-ffmpeg:
-  h264: "-codec:v libx264 -g:v 30 -preset:v superfast -tune:v zerolatency -profile:v main -level:v 4.1"
-  mycodec: "-any args that supported by ffmpeg..."
-  myinput: "-fflags nobuffer -flags low_delay -timeout 5000000 -i {input}"
-  myraw: "-ss 00:00:20"
-
 streams:
-  picam_h264: exec:/stream.sh
   #easy_cap:   ffmpeg:device?video=/dev/video0&video_size=720x480#video=h264
+  loopback: ffmpeg:device?video=/dev/video50&input_format=h264&video_size=1536x864

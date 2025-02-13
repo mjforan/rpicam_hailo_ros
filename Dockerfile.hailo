@@ -1,0 +1,9 @@
+# syntax=docker/dockerfile:1.7-labs
+# ^ this can be removed when the `COPY --parents` syntax reaches stable
+
+ARG ROS_DISTRO=jazzy
+FROM mjforan/ros-base:${ROS_DISTRO}
+
+RUN apt install -y ros-$ROS_DISTRO-vision-msgs
+
+CMD ros2 launch hailo_ros hailo_ros.launch.py

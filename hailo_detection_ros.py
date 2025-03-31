@@ -15,6 +15,8 @@ class user_app_callback_class(app_callback_class, Node):
         app_callback_class.__init__(self)
         Node.__init__(self, "hailo_detection_publisher")
         self.publisher_ = self.create_publisher(Detection2DArray, '/detections', 10)
+        self.det_msg = Detection2D()
+        self.det_msg.results = [ObjectHypothesisWithPose()]
 
     def publish(self, detections):
         det_arr_msg = Detection2DArray()
@@ -22,19 +24,16 @@ class user_app_callback_class(app_callback_class, Node):
         det_arr_msg.header.frame_id = "hailo_frame"
 
         for detection in detections:
-            det_msg = Detection2D()
-            result_msg = ObjectHypothesisWithPose()
-            det_msg.header.stamp = det_arr_msg.header.stamp
-            det_msg.header.frame_id = det_arr_msg.header.frame_id
+            self.det_msg.header.stamp = det_arr_msg.header.stamp
+            self.det_msg.header.frame_id = det_arr_msg.header.frame_id
             bbox = detection.get_bbox()
-            det_msg.bbox.center.position.x = (bbox.xmin() + bbox.xmax())/2
-            det_msg.bbox.center.position.y = (bbox.ymin() + bbox.ymax())/2
-            det_msg.bbox.size_x            = bbox.width()
-            det_msg.bbox.size_y            = bbox.height()
-            result_msg.hypothesis.class_id = detection.get_label()
-            result_msg.hypothesis.score    = detection.get_confidence()
-            det_msg.results = [result_msg]
-            det_arr_msg.append(det_msg)
+            self.det_msg.bbox.center.position.x = (bbox.xmin() + bbox.xmax())/2
+            self.det_msg.bbox.center.position.y = (bbox.ymin() + bbox.ymax())/2
+            self.det_msg.bbox.size_x            = bbox.width()
+            self.det_msg.bbox.size_y            = bbox.height()
+            self.det_msg.results[0].hypothesis.class_id = detection.get_label()
+            self.det_msg.results[0].hypothesis.score    = detection.get_confidence()
+            det_arr_msg.append(self.det_msg)
 
         self.publisher_.publish(det_arr_msg)
 

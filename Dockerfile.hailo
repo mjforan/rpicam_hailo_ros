@@ -43,9 +43,10 @@ RUN apt update && apt install -y curl gpg && \
     apt update && \
     apt install -y hailo-all python3-venv sudo meson wget
 
-ADD https://github.com/hailo-ai/hailo-rpi5-examples.git hailo-rpi5-examples
-COPY hailo_detection_ros.py hailo_detection_ros.py
-
-CMD cd hailo-rpi5-examples && ./install.sh && source setup_env.sh && python3 -m pip install git+https://github.com/hailo-ai/hailo-apps-infra.git && source /ros2_ws/install/setup.bash && python3 /hailo_detection_ros.py --input /dev/video51
-
-#RUN apt install -y python3-gst-1.0
+ADD --keep-git-dir https://github.com/hailo-ai/Hailo-Application-Code-Examples.git ./Hailo-Application-Code-Examples
+WORKDIR /Hailo-Application-Code-Examples/runtime/python/detection_with_tracker
+# Available models: https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst
+RUN python3 -m pip install --break-system-packages git+https://github.com/rubenvandeven/bytetrack-pip.git -r requirements.txt
+ADD https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/yolov8m.hef model.hef
+COPY detection_with_tracker.py detection_with_tracker.py
+CMD HAILO_MONITOR=1 python3 detection_with_tracker.py -n model.hef -i /dev/video51 -s 0.6

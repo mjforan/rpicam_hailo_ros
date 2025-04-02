@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 
+# global shutter cam: 1456:1088
 rpicam-vid --mode 1536:864     \
            --width 1536        \
            --height 864        \

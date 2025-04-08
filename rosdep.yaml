@@ -1,0 +1,4 @@
+hailo:
+  debian:
+    apt:
+      packages: [hailo-all]

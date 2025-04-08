@@ -1,3 +1,6 @@
+# syntax=docker/dockerfile:1.7-labs
+# ^ this can be removed when the `COPY --parents` syntax reaches stable
+
 FROM debian:12
 
 SHELL ["/bin/bash", "-c"]
@@ -12,14 +15,12 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloa
 ARG ROS_DISTRO=jazzy
 
 # Install python3-vsctools here and ignore in rosdep install - Debian package has slightly different name
-# Downgrade libssl slightly to fix dependency issue
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
      apt update && \
-     apt install -y vcstool python3-rosdep2 python3-vcstools colcon build-essential && \
-     apt install -y --allow-downgrades libssl3=3.0.14-1~deb12u2
+     apt upgrade -y && \
+     apt install -y vcstool python3-rosdep2 python3-vcstools colcon build-essential
 WORKDIR /ros2_ws
-# It would be nice to ADD these repos so Docker caches them
 RUN mkdir src && vcs import --input https://raw.githubusercontent.com/ros2/ros2/$ROS_DISTRO/ros2.repos src
 ADD https://github.com/ros-perception/vision_msgs.git#ros2 /ros2_ws/src/ros-perception/vision_msgs
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
@@ -27,26 +28,40 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
      apt upgrade -y && rosdep update && \
      rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers python3-vcstool"
 RUN colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-up-to geometry2 launch launch_ros rcl rmw_cyclonedds_cpp rmw_implementation ros2cli_common_extensions image_common vision_msgs
-COPY ros_entrypoint.sh /ros_entrypoint.sh
-ENTRYPOINT [ "/ros_entrypoint.sh" ]
 
 
 ##########################
 ##  Hailo
 ##########################
-WORKDIR /
+COPY colcon_entrypoint.sh /colcon_entrypoint.sh
+ENTRYPOINT [ "/colcon_entrypoint.sh" ]
 
 # Add raspberry pi sources for hailo
-RUN apt update && apt install -y curl gpg && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -y curl gpg && \
     curl -fsSL http://archive.raspberrypi.com/debian/raspberrypi.gpg.key | gpg --dearmor -o /usr/share/keyrings/raspberrypi.gpg && \
-    echo "deb [arch=arm64 signed-by=/usr/share/keyrings/raspberrypi.gpg] http://archive.raspberrypi.com/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list && \
-    apt update && \
-    apt install -y hailo-all python3-venv sudo meson wget
+    echo "deb [arch=arm64 signed-by=/usr/share/keyrings/raspberrypi.gpg] http://archive.raspberrypi.com/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list
 
-ADD --keep-git-dir https://github.com/hailo-ai/Hailo-Application-Code-Examples.git ./Hailo-Application-Code-Examples
-WORKDIR /Hailo-Application-Code-Examples/runtime/python/detection_with_tracker
+WORKDIR /colcon_ws
+RUN mkdir src
+# Install custom rosdep rule for hailo-all
+COPY ./rosdep.list /etc/ros/rosdep/sources.list.d/00-hailo.list
+COPY ./rosdep.yaml /hailo_rosdep.yaml
+# Install rosdeps without copying source code yet
+COPY --parents ./**/package.xml src/
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    . /ros2_ws/install/setup.bash && \
+    apt update && apt upgrade -y && rosdep update && \
+    rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
+# Bring in the modified detection code
+COPY ./hailo_detect_ros/ src/hailo_detect_ros
+# Download the non-modified source code files
+ADD https://github.com/hailo-ai/Hailo-Application-Code-Examples.git#main:runtime/cpp/object_detection/utils src/hailo_detect_ros/src/utils
+RUN . /ros2_ws/install/setup.bash && \
+    colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 # Available models: https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst
-RUN python3 -m pip install --break-system-packages git+https://github.com/rubenvandeven/bytetrack-pip.git -r requirements.txt
-ADD https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/yolov8m.hef model.hef
-COPY detection_with_tracker.py detection_with_tracker.py
-CMD HAILO_MONITOR=1 python3 detection_with_tracker.py -n model.hef -i /dev/video51 -s 0.6
+ADD https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/yolov8m.hef /model.hef
+
+CMD HAILO_MONITOR=1 ros2 run hailo_detect hailo_detect --ros-args -p model:=/model.hef -p source:=/dev/video51

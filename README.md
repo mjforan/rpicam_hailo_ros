@@ -18,5 +18,14 @@ echo "options v4l2loopback devices=2 video_nr=50,51" > /etc/modprobe.d/v4l2loopb
 reboot now
 ```
 
+# Tuning
+It may be desirable to have the stream running at a higher rate than your model and hardware can support. An easy way to achieve this is to run
+the model at 1/2, 1/3, etc. speed by discarding frames (`capture.grab()`) in [object_tracking.cpp](hailo_detect_ros/src/object_tracking.cpp).
+This approach is best for real-time consistency.
+
+Hailo utilization can be observed by running `hailortcli monitor` in the same container.
+
+Don't forget there are two models of AI hats available, with the Hailo-8 (non-L) chip having significantly more power.
+
 # Troubleshooting
 Hailo driver mismatch: The driver on the host must match the version in the container. If you recently upgraded on the host, make sure to reboot.

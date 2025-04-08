@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 
 # global shutter cam: 1456:1088
-rpicam-vid --mode 1536:864     \
-           --width 1536        \
-           --height 864        \
+# pi cam 3: 1536:864
+rpicam-vid --mode 1456:1088    \
+           --width 1456        \
+           --height 1088       \
            --framerate 30      \
            --timeout 0         \
            --nopreview         \

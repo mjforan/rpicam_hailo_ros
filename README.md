@@ -1,9 +1,10 @@
-# rpicam_ros
+# hailo_detect_ros
 
 The goal for this project is to enable the lowest latency possible for web streaming and Hailo AI inference + ROS 2 publishing **simultaneously**.
 The standard way of doing things (post processing stages in `rpicam-vid`) adds latency to the final output.
 Instead, `rpicam-vid` output is mirrored to two v4l2 loopback devices. One device is used as an input to the live stream,
-while the other is opened by the AI processor.
+while the other is opened by the AI processor. As a nice side effect, this approach is not limited to the Raspberry Pi camera ecosystem.
+The detection and publisher code will work on any device which populates a `/dev/videoX` device.
 
 # Installation
 For Raspberry Pi 5 only.

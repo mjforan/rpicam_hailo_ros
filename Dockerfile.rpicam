@@ -14,7 +14,7 @@ RUN apt update && apt install -y curl gpg && \
 RUN apt update && apt upgrade -y && apt install -y libcamera-dev libjpeg-dev libtiff5-dev libpng-dev libavdevice-dev \
     libboost-program-options-dev libdrm-dev libexif-dev meson ninja-build wget ffmpeg
 
-ADD https://github.com/raspberrypi/rpicam-apps.git /rpicam-apps
+ADD https://github.com/raspberrypi/rpicam-apps.git#6106d9384fd565a9523d68d37b7c0fe70895f858 /rpicam-apps
 WORKDIR /rpicam-apps
 
 RUN meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=disabled -Denable_qt=disabled -Denable_opencv=disabled -Denable_tflite=disabled -Denable_hailo=disabled

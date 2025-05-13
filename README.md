@@ -19,6 +19,8 @@ reboot now
 ```
 
 # Tuning
+Make sure to select the appropriate compiled model in [Dockerfile.hailo](Dockerfile.hailo). The same URL scheme works for both accelerators, just add an 'l' for the 8-L version.
+
 It may be desirable to have the stream running at a higher rate than your model and hardware can support. An easy way to achieve this is to run
 the model at 1/2, 1/3, etc. speed by discarding frames (`capture.grab()`) in [object_tracking.cpp](hailo_detect_ros/src/object_tracking.cpp).
 This approach is best for real-time consistency.

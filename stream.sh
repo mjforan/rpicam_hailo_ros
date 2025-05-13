@@ -19,8 +19,3 @@ rpicam-vid --mode 1456:1088    \
     | ffmpeg -i - -f v4l2 -codec copy /dev/video50 -f v4l2 -codec copy /dev/video51 2>/dev/null &
 
 go2rtc --config /config/go2rtc.yaml
-
-
-
-
-

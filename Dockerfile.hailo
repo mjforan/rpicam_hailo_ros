@@ -62,6 +62,7 @@ ADD https://github.com/hailo-ai/Hailo-Application-Code-Examples.git#main:runtime
 RUN . /ros2_ws/install/setup.bash && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 # Available models: https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst
-ADD https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8l/yolov8m.hef /model.hef
+ADD https://hailo-model-zoo.s3.eu-west-2.amazonaws.com/ModelZoo/Compiled/v2.14.0/hailo8/yolov8s.hef /model.hef
 
-CMD HAILO_MONITOR=1 ros2 run hailo_detect hailo_detect --ros-args -p model:=/model.hef -p source:=/dev/video51
+CMD ros2 run hailo_detect hailo_detect --ros-args -p model:=/model.hef -p source:=/dev/video51
+# HAILO_MONITOR=1

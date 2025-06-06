@@ -58,7 +58,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # Bring in the modified detection code
 COPY ./hailo_detect_ros/ src/hailo_detect_ros
 # Download the non-modified source code files
-ADD https://github.com/hailo-ai/Hailo-Application-Code-Examples.git#main:runtime/cpp/object_detection/utils src/hailo_detect_ros/src/utils
+ADD https://github.com/hailo-ai/Hailo-Application-Code-Examples.git#main:runtime/hailo-8/cpp/object_detection/utils src/hailo_detect_ros/src/utils
 RUN . /ros2_ws/install/setup.bash && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 # Available models: https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst

@@ -19,6 +19,35 @@ echo "options v4l2loopback devices=2 video_nr=50,51" > /etc/modprobe.d/v4l2loopb
 reboot now
 ```
 
+# Running
+TODO this should eventually point to the parent project, which is not currently public.
+
+For now, you can run with this `docker-compose.yml` (hailo is disabled due to a memory leak):
+
+```
+services:
+  rpicam:
+    image: mjforan/rpicam
+    build:
+      dockerfile: Dockerfile.rpicam
+    privileged: true # TODO pass specific devices
+    network_mode: host
+    volumes:
+      - /run/udev:/run/udev
+      - /dev/dma_heap:/dev/dma_heap
+      - ./go2rtc.yaml:/config/go2rtc.yaml
+
+#  hailo-ros:
+#    image: mjforan/hailo-ros:${ROS_DISTRO:-rolling}
+#    build:
+#      dockerfile: Dockerfile.hailo
+#    env_file: .env
+#    network_mode: host
+#    devices:
+#      - /dev/video51:/dev/video51
+#      - /dev/hailo0:/dev/hailo0
+```
+
 # Tuning
 Make sure to select the appropriate compiled model in [Dockerfile.hailo](Dockerfile.hailo). The same URL scheme works for both accelerators, just add an 'l' for the 8-L version.
 

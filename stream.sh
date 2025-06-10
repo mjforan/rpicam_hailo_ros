@@ -2,7 +2,7 @@
 
 # global shutter cam: 1456:1088
 # pi cam 3: 1536:864
-rpicam-vid --mode 1456:1088    \
+LD_LIBRARY_PATH=/usr/local/lib/aarch64-linux-gnu rpicam-vid --mode 1456:1088    \
            --width 1456        \
            --height 1088       \
            --framerate 30      \

@@ -21,7 +21,7 @@ RUN meson setup build -Denable_libav=enabled -Denable_drm=enabled -Denable_egl=d
 RUN meson compile -C build && meson install -C build
 RUN ldconfig
 
-# TODO statically compile https://github.com/ros2/ament_cmake_ros/blob/3f421a0bafa8de0caae1ae2baefc5b982bf4f81a/ament_cmake_ros/cmake/build_shared_libs.cmake#L15-L20 and only copy binaries to output image
+# TODO Reduce image size! statically compile https://github.com/ros2/ament_cmake_ros/blob/3f421a0bafa8de0caae1ae2baefc5b982bf4f81a/ament_cmake_ros/cmake/build_shared_libs.cmake#L15-L20 and only copy binaries to final image
 
 ADD --chmod=755 https://github.com/AlexxIT/go2rtc/releases/latest/download/go2rtc_linux_arm64 /usr/local/bin/go2rtc
 

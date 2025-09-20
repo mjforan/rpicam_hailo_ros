@@ -14,20 +14,21 @@ find_package(HailoRT REQUIRED)
 find_package(OpenCV REQUIRED)
 
 file(GLOB SOURCES
-    ./src/*.cpp
-    ./src/utils/*.cpp
+    ./src/Hailo-Application-Code-Examples/runtime/hailo-8/cpp/common/*.cpp
+    ./src/Hailo-Application-Code-Examples/runtime/hailo-8/cpp/object_detection/*.cpp
+    ./src/Hailo-Application-Code-Examples/runtime/hailo-8/cpp/object_detection/utils/*.cpp
 )
 add_executable(${PROJECT_NAME} ${SOURCES})
-ament_target_dependencies(${PROJECT_NAME} rclcpp vision_msgs)
-target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra)
+target_compile_features(${PROJECT_NAME} PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
+target_compile_options(${PROJECT_NAME} PRIVATE -Wall -Wextra -Wpedantic -Werror)
+target_link_libraries(${PROJECT_NAME} rclcpp::rclcpp ${vision_msgs_TARGETS})
 target_link_libraries(${PROJECT_NAME} Threads::Threads HailoRT::libhailort)
 target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 target_include_directories(${PROJECT_NAME} PUBLIC
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/utils>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Hailo-Application-Code-Examples/runtime/hailo-8/cpp/common>
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src/Hailo-Application-Code-Examples/runtime/hailo-8/cpp/object_detection/utils>
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
   ${OpenCV_INCLUDE_DIRS})
-target_compile_features(${PROJECT_NAME} PUBLIC c_std_99 cxx_std_20)  # Require C99 and C++20
 
 install(TARGETS ${PROJECT_NAME}
   DESTINATION lib/${PROJECT_NAME})

@@ -1,0 +1,6 @@
+[submodule "rpicam-apps"]
+	path = rpicam-apps
+	url = https://github.com/mjforan/rpicam-apps
+[submodule "hailo_detect_ros/src/Hailo-Application-Code-Examples"]
+	path = hailo_detect_ros/src/Hailo-Application-Code-Examples
+	url = https://github.com/mjforan/Hailo-Application-Code-Examples.git

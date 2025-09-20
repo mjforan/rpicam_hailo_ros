@@ -1,14 +1,37 @@
 FROM debian:12
 
-# https://www.raspberrypi.com/documentation/computers/camera_software.html#build-libcamera-and-rpicam-apps
+#### Build OpenCV (This is not the final configuration)
+WORKDIR /opencv
 
-# Add Raspberry Pi sources for libcamera
-RUN apt update && apt install -y curl gpg && \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt upgrade -y && \
+    apt install -y cmake g++ wget unzip libgtk2.0-dev pkg-config
+ADD https://github.com/opencv/opencv/archive/4.x.zip opencv.zip
+RUN unzip opencv.zip
+ADD https://github.com/opencv/opencv_contrib/archive/4.x.zip opencv_contrib.zip
+RUN unzip opencv_contrib.zip
+RUN mkdir -p build && cd build && \
+    cmake -DBUILD_EXAMPLES=ON -DOPENCV_EXTRA_MODULES_PATH=../opencv_contrib-4.x/modules ../opencv-4.x && \
+    cmake --build . -j`nproc`
+
+
+##########################
+##  Build libcamera
+##########################
+
+# Add raspberry pi sources for libcamera
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt install -y curl gpg && \
     curl -fsSL http://archive.raspberrypi.com/debian/raspberrypi.gpg.key | gpg --dearmor -o /usr/share/keyrings/raspberrypi.gpg && \
     echo "deb [arch=arm64 signed-by=/usr/share/keyrings/raspberrypi.gpg] http://archive.raspberrypi.com/debian/ bookworm main" > /etc/apt/sources.list.d/raspi.list
 
-# Install prerequisites
-RUN apt update && apt upgrade -y && apt install -y libcamera-dev libjpeg-dev libtiff5-dev libpng-dev libavdevice-dev \
+# https://www.raspberrypi.com/documentation/computers/camera_software.html#build-libcamera-and-rpicam-apps
+
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+    --mount=type=cache,target=/var/lib/apt,sharing=locked \
+    apt update && apt upgrade -y && apt install -y libcamera-dev libjpeg-dev libtiff5-dev libpng-dev libavdevice-dev \
     libboost-program-options-dev libdrm-dev libexif-dev meson ninja-build wget ffmpeg git
 
 # Clone rpicam-apps

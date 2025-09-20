@@ -12,22 +12,27 @@ RUN rm -f /etc/apt/apt.conf.d/docker-clean; echo 'Binary::apt::APT::Keep-Downloa
 ##########################
 ##  Build ROS 2
 ##########################
-ARG ROS_DISTRO=jazzy
+ARG ROS_DISTRO=kilted
 
 # Install python3-vsctools here and ignore in rosdep install - Debian package has slightly different name
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
      apt update && \
      apt upgrade -y && \
-     apt install -y vcstool python3-rosdep2 python3-vcstools colcon build-essential
+     apt install -y vcstool python3-rosdep2 python3-vcstools colcon build-essential curl
 WORKDIR /ros2_ws
 RUN mkdir src && vcs import --input https://raw.githubusercontent.com/ros2/ros2/$ROS_DISTRO/ros2.repos src
 ADD https://github.com/ros-perception/vision_msgs.git#ros2 /ros2_ws/src/ros-perception/vision_msgs
+# Install Rust manually because the version in apt is not recent enough for zenoh
+ENV PATH=/root/.cargo/bin:$PATH
+RUN curl --proto '=https' --tlsv1.3 -sSf https://sh.rustup.rs | sh -s -- -y && cargo --version
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,target=/var/lib/apt,sharing=locked \
-     apt upgrade -y && rosdep update && \
-     rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y --skip-keys "fastcdr rti-connext-dds-6.0.1 urdfdom_headers python3-vcstool"
-RUN colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release --packages-up-to geometry2 launch launch_ros rcl rmw_cyclonedds_cpp rmw_implementation ros2cli_common_extensions image_common vision_msgs
+     apt update && apt upgrade -y && rosdep update && \
+     rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y --skip-keys "fastcdr rti-connext-dds-7.3.0 urdfdom_headers python3-vcstool"
+
+# TODO -DCMAKE_CXX_FLAGS="-Wno-maybe-uninitialized" due to this issue https://github.com/eProsima/Fast-DDS/issues/5277
+RUN . $HOME/.cargo/env && colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release  -DCMAKE_CXX_FLAGS="-Wno-maybe-uninitialized" --packages-up-to geometry2 launch launch_ros rcl rmw_cyclonedds_cpp rmw_implementation ros2cli_common_extensions image_common vision_msgs
 
 
 ##########################
@@ -57,8 +62,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     rosdep install --from-paths src --ignore-src --rosdistro $ROS_DISTRO -y
 # Bring in the modified detection code
 COPY ./hailo_detect_ros/ src/hailo_detect_ros
-# Download the non-modified source code files
-ADD https://github.com/hailo-ai/Hailo-Application-Code-Examples.git#main:runtime/hailo-8/cpp/object_detection/utils src/hailo_detect_ros/src/utils
+#ADD https://github.com/mjforan/Hailo-Application-Code-Examples.git src/hailo_detect_ros/src
 RUN . /ros2_ws/install/setup.bash && \
     colcon build --symlink-install --cmake-args -DCMAKE_BUILD_TYPE=Release
 # Available models: https://github.com/hailo-ai/hailo_model_zoo/blob/master/docs/public_models/HAILO8L/HAILO8L_object_detection.rst

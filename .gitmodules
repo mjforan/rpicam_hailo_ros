@@ -4,3 +4,6 @@
 [submodule "hailo_detect_ros/src/Hailo-Application-Code-Examples"]
 	path = hailo_detect_ros/src/Hailo-Application-Code-Examples
 	url = https://github.com/mjforan/Hailo-Application-Code-Examples.git
+[submodule "hailo_detect_ros/src/ByteTrack-cpp"]
+	path = hailo_detect_ros/src/ByteTrack-cpp
+	url = https://github.com/Vertical-Beach/ByteTrack-cpp.git
